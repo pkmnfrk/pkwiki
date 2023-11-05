@@ -1,6 +1,6 @@
 {
-  "name": "mdwiki",
-  "version": "1.0.0",
+  "name": "pkwiki",
+  "version": "0.1.0",
   "description": "",
   "main": "src/index.mjs",
   "module": "es6",
@@ -9,8 +9,12 @@
   },
   "bin": "src/index.mjs",
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Mike Caron <caron.mike@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pkmnfrk/pkwiki/issues"
+  },
+  "homepage": "https://github.com/pkmnfrk/pkwiki",
   "dependencies": {
     "glob": "^10.3.10",
     "markdown-it": "^13.0.2",

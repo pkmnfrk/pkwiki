@@ -1,21 +1,21 @@
-# MDWiki
+# PKWiki
 
 This is a node package to assist in creating a simple static website from markdown pages.
 
 ## Usage
 
-You may choose to install MDWiki globally:
+You may choose to install PKWiki globally:
 
 ```bash
-npm install -g mdwiki
-mdwiki <input folder> <output folder>
+npm install -g pkwiki
+pkwiki <input folder> <output folder>
 ```
 
 Or locally into a node project:
 
 ```bash
-npm install mdwiki
-npx mdwiki <input folder> <output folder>
+npm install pkwiki
+npx pkwiki <input folder> <output folder>
 ```
 
 Either way, the `<input folder>` should contain the following things:
