@@ -5,7 +5,9 @@
   "main": "src/index.mjs",
   "module": "es6",
   "scripts": {
-    "test": "node src/index.mjs test test_out"
+    "test": "node src/index.mjs test test_out",
+    "watch": "node src/index.mjs test test_out --watch",
+    "invalidChild": "node src/index.mjs test test/out"
   },
   "bin": "src/index.mjs",
   "keywords": [],
@@ -18,6 +20,7 @@
   "dependencies": {
     "glob": "^10.3.10",
     "markdown-it": "^13.0.2",
-    "markdown-it-headinganchor": "^1.3.0"
+    "markdown-it-headinganchor": "^1.3.0",
+    "node-watch": "^0.7.4"
   }
 }
