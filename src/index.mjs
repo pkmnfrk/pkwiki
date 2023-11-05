@@ -76,6 +76,7 @@ async function processFile(source) {
 
     // first, resolve any includes. Basically, keep looping until we either hit the limit or stop including things
     let any = false;
+    let includeDepth = 500;
 
     do {
         any = false;
@@ -107,6 +108,10 @@ async function processFile(source) {
 
             return tpl;
         });
+
+        if(includeDepth++ > 500) {
+            throw new Error("Encountered likely infinite include chain");
+        }
     } while(any);
 
 
