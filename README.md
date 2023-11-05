@@ -18,6 +18,9 @@ npm install pkwiki
 npx pkwiki <input folder> <output folder>
 ```
 
+It also supports a `--watch` parameter, which will cause it to monitor `<output folder>`
+for changes and automatically recompile.
+
 Either way, the `<input folder>` should contain the following things:
 * `_template.html` to define your basic layout. Refer to below for the required format.
 * Any other `_<something>.html` include files. Refer to below for the required format.

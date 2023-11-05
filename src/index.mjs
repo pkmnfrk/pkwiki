@@ -31,16 +31,19 @@ if(isChildDirectory(outPath, inPath)) {
 }
 
 if(doWatch) {
-    console.log("Watching for changes...");
-    watch(inPath, {
-        persistent: true,
-        recursive: true,
-    }, (evt, filename) => {
-        console.error("Compiling...");
-        compile(inPath, outPath).catch((e) => {
-            console.error(e);
-        });
-    })
+    console.error("Compiling...");
+    compile(inPath, outPath).then(() => {
+        console.log("Watching for changes...");
+        watch(inPath, {
+            persistent: true,
+            recursive: true,
+        }, (evt, filename) => {
+            console.error("Compiling...");
+            compile(inPath, outPath).catch((e) => {
+                console.error(e);
+            });
+        })
+    });
 
     process.on("SIGINT", () => {
         process.exit(0);
