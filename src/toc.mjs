@@ -28,8 +28,6 @@ export function handleToc(tokens, md) {
 
             const parts = token.content.split(tocMarker);
 
-            console.log(parts);
-
             if(parts[0]) {
                 newTokens.unshift({
                     ...token,
