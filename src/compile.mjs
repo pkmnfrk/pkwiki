@@ -75,7 +75,7 @@ export async function compile(inPath, outPath) {
         const pragma = /^#(\w+)(.*)$/gm;
         const include = /\{\{([^#].*?)(?:\|(.*))?\}\}/g;
         const includeArg = /(?<!\\)\|/g;
-        const includeParam = /{{#(\d)(?:\|.*?)?}}/g;
+        const includeParam = /{{#(\d)(?:\|(.*?))?}}/g;
         const props = {
 
         };
