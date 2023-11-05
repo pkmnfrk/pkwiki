@@ -124,3 +124,44 @@ Check it out: <blink>Blinky blinky hole</blink>
 
 You may recursively include templates, but don't create circular references, this will cause generation to fail.
 
+### Table of Contents
+You could manually create a table of contents, or you can let PKWiki do it for you.
+
+```text
+#toc
+#toc 2
+```
+
+This will look for headings in the page (eg `## Blah`) and construct a simple table of contents. This process
+is a bit involved, but for most cases this will work fine.
+
+By default, the table of contents will only contain the highest priority headers (eg, `h1`) and ignore
+anything lower. If the highest priority is `h4`, then that will be included, but `h5` will not.
+
+However, if you pass a number, then it will include anything of that priority or higher. For example, `#toc 3`
+will include all `h1`, `h2` and `h3` headings. Note that this is not dynamic: If there are only `h4` headings
+then `#toc 3` will generate nothing.
+
+The produced table of contents will have the class `table-of-contents` for styling purposes.
+
+Example:
+
+```text
+#toc 2
+# Foo
+## Bar
+### Baz
+## Quux
+# Qaaz
+## Bill
+```
+
+Will produce the equivalent of this table of contents:
+
+```text
+1. Foo
+   1. Bar
+   2. Quux
+2. Qaaz
+   1. Bill
+```

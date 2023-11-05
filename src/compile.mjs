@@ -5,6 +5,7 @@ import { safeMkdir, safeRm, safeName } from "./util.mjs";
 import { promises as fs } from "fs";
 import {join, basename, dirname} from "path";
 import {glob} from "glob";
+import { handleToc } from "./toc.mjs";
 
 const md = new MarkdownIt("default", {
     html: true,
@@ -44,7 +45,11 @@ export async function compile(inPath, outPath) {
 
     for(const page of Object.values(allPages)) {
         const reProcessed = await processFile(page.raw);
-        const html = md.render(reProcessed.text);
+        //const html = md.render(reProcessed.text);
+        const env = {}
+        const tokens = md.parse(reProcessed.text, env);
+        handleToc(tokens, md);
+        const html = md.renderer.render(tokens, md.options, env);
 
         const body = template.
             replace("{{prefixedtitle}}", ` - ${page.title}`).

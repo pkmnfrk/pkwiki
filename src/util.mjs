@@ -31,3 +31,11 @@ export function isChildDirectory(child, parent) {
     return child.indexOf(parent) === 0;
 
 }
+
+export function repeatString(char, num) {
+    let ret = "";
+    for(let i = 0; i < num; i++) {
+        ret += char;
+    }
+    return ret;
+}
