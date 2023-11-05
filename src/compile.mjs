@@ -135,6 +135,9 @@ export async function compile(inPath, outPath) {
 
             if(!allPages[dest]) {
                 className = "broken";
+                if(allPages["404"]) {
+                    dest = "404";
+                }
             }
 
             return `<a href="${dest}.html${anchor ? `#${anchor}` : ""}"${className ? ` class="${className}"` : ""}>${title}</a>`;

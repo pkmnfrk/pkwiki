@@ -25,6 +25,7 @@ Either way, the `<input folder>` should contain the following things:
 * `_template.html` to define your basic layout. Refer to below for the required format.
 * Any other `_<something>.html` include files. Refer to below for the required format.
 * A series of Markdown files with your content. Refer to below for the required format.
+* Special pages with specific purposes. Refer below etc etc you get the idea.
 * Any additional resources (stylesheets, images, etc) to be copied to the output
 
 Refer to the `test` folder in this package for a working example.
@@ -168,3 +169,9 @@ Will produce the equivalent of this table of contents:
 2. Qaaz
    1. Bill
 ```
+
+## Special pages
+Some pages have a special purpose. They can be used as regular pages too, if you wish, but it is important to know they also serve a special function.
+
+### 404.md
+If this page exists, then any broken links will be modified to point to this page instead. The link will still render the way it does normally, and will still be marked as broken, but it will direct the user to this page instead of going to the non-existant page.
