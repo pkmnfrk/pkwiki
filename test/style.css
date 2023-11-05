@@ -1,0 +1,25 @@
+body {
+    background-color: #222;
+    color: white;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin: 20px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+}
+
+a {
+    color: cyan;
+}
+
+a:visited {
+    color: pink;
+}
+
+a.broken {
+    color: red;
+}
+
+#menu {
+    float: left;
+    width: 200px;
+}
