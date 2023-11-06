@@ -5,9 +5,9 @@
   "main": "src/index.mjs",
   "module": "es6",
   "scripts": {
-    "test": "node src/index.mjs test test_out",
-    "watch": "node src/index.mjs test test_out --watch",
-    "invalidChild": "node src/index.mjs test test/out"
+    "test": "node src/index.mjs test_site test_out",
+    "watch": "node src/index.mjs test_site test_out --watch",
+    "invalidChild": "node src/index.mjs test_site test_site/out"
   },
   "bin": "src/index.mjs",
   "keywords": [],
