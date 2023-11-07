@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { isChildDirectory } from "./util.mjs";
-import { compile } from "./compile.mjs";
+import { Compiler } from "./compile.mjs";
 import watch from "node-watch";
 
 let inPath, outPath;
@@ -30,16 +30,18 @@ if(isChildDirectory(outPath, inPath)) {
     process.exit(1);
 }
 
+const compiler = new Compiler(inPath, outPath);
+
 if(doWatch) {
     console.error("Compiling...");
-    compile(inPath, outPath).then(() => {
+    compiler.compile(inPath, outPath).then(() => {
         console.log("Watching for changes...");
         watch(inPath, {
             persistent: true,
             recursive: true,
         }, (evt, filename) => {
             console.error("Compiling...");
-            compile(inPath, outPath).catch((e) => {
+            compiler.compile(inPath, outPath).catch((e) => {
                 console.error(e);
             });
         })
@@ -50,7 +52,7 @@ if(doWatch) {
     });
 } else {
     try {
-        await compile(inPath, outPath);
+        await compiler.compile(inPath, outPath);
     } catch(e) {
         console.error(e);
     }

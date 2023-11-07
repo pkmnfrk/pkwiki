@@ -1,11 +1,11 @@
 import MarkdownIt from "markdown-it";
 import markdownItHeadinganchor from "markdown-it-headinganchor";
 
-import { safeMkdir, safeRm, safeName } from "./util.mjs";
-import { promises as fs } from "fs";
-import {join, basename, dirname} from "path";
-import {glob} from "glob";
+import { safeName } from "./util.mjs";
+import { basename, dirname } from "path";
 import { handleToc } from "./toc.mjs";
+import { FileLoader } from "./file-loader.mjs";
+import { FileSaver } from "./file-saver.mjs";
 
 const md = new MarkdownIt("default", {
     html: true,
@@ -14,63 +14,82 @@ const md = new MarkdownIt("default", {
     addHeadingAnchor: false,
 });
 
+export class Compiler {
+    #loader;
+    #saver;
+    #md;
+    #allPages;
+    #includeCache;
 
-export async function compile(inPath, outPath) {
-    await safeRm(outPath);
-    await safeMkdir(outPath);
+    constructor(inPath, outPath) {
+        this.#loader = new FileLoader(inPath);
+        this.#saver = new FileSaver(outPath);
 
-    const template = await fs.readFile(join(inPath, "_template.html"), "utf-8");
+        this.#md = new MarkdownIt("default", {
+            html: true,
+        }).use(markdownItHeadinganchor, {
+            addHeadingId: true,
+            addHeadingAnchor: false,
+        });
+    }
 
-    const files = await glob(join(inPath, "*.md"));
+    async compile() {
+        this.#saver.recreateFolder();
 
-    const allPages = {};
-    const includeCache = {};
+        const template = await this.#loader.load("_template.html");
+    
+        const files = await this.#loader.glob("*.md");
+    
+        this.#allPages = {};
+        this.#includeCache = {};
 
-    for(const file of files) {
-        try {
-            const source = await fs.readFile(file, "utf-8");
-            const processedSource = await processFile(source);
-            const baseName = safeName(basename(file, ".md"));
-            const page = {
-                raw: source,
-                baseName,
-                title: baseName,
-                ...processedSource,
-            };
-            allPages[baseName] = page;
-        } catch(e) {
-            throw new Error(`Encountered error processing page ${file}: ${e.message}`);
+        for await(const file of files) {
+            try {
+                const source = await this.#loader.load(file);
+                const processedSource = await this.#processFile(source);
+                const baseName = safeName(basename(file, ".md"));
+                const page = {
+                    raw: source,
+                    baseName,
+                    title: baseName,
+                    ...processedSource,
+                };
+                this.#allPages[baseName] = page;
+            } catch(e) {
+                throw new Error(`Encountered error processing page ${file}: ${e.message}`);
+            }
         }
+    
+        for(const page of Object.values(this.#allPages)) {
+            const reProcessed = await this.#processFile(page.raw);
+            //const html = md.render(reProcessed.text);
+            const env = {}
+            const tokens = this.#md.parse(reProcessed.text, env);
+            handleToc(tokens, this.#md);
+            const html = md.renderer.render(tokens, this.#md.options, env);
+    
+            const body = template.
+                replace("{{prefixedtitle}}", ` - ${page.title}`).
+                replace("{{title}}", page.title).
+                replace("{{body}}", html);
+    
+            await this.#saver.save(`${page.baseName}.html`, body);
+        }
+    
+        for await (const file of this.#loader.glob("**/*.{css,png,jpg,gif}")) {
+            const buf = await this.#loader.loadBinary(file);
+            await this.#saver.saveBinary(file, buf);
+        }
+    
     }
 
-    for(const page of Object.values(allPages)) {
-        const reProcessed = await processFile(page.raw);
-        //const html = md.render(reProcessed.text);
-        const env = {}
-        const tokens = md.parse(reProcessed.text, env);
-        handleToc(tokens, md);
-        const html = md.renderer.render(tokens, md.options, env);
-
-        const body = template.
-            replace("{{prefixedtitle}}", ` - ${page.title}`).
-            replace("{{title}}", page.title).
-            replace("{{body}}", html);
-        
-        // console.log("Writing", page.baseName);
-
-        await fs.writeFile(join(outPath, `${page.baseName}.html`), body, "utf-8");   
-    }
-
-    for(const file of await glob(join(inPath, "**/*.{css,png,jpg,gif}"))) {
-        const subPath = join(outPath, file.substring(inPath.length));
-
-        const dir = dirname(subPath);
-        // console.log("Creating", dir);
-        await safeMkdir(dir);
-        await fs.copyFile(file, subPath);
-    }
-
-    async function processFile(source) {
+    /**
+     * 
+     * @param {string} source 
+     * @param {FileLoader} loader 
+     * @returns 
+     */
+    async #processFile(source) {
         const link = /\[\[(.*?)(?:\|(.*?))?\]\]/g;
         const pragma = /^#(\w+)(.*)$/gm;
         const include = /\{\{([^#].*?)(?:\|(.*))?\}\}/g;
@@ -90,20 +109,20 @@ export async function compile(inPath, outPath) {
             const files = [];
             source.replace(include, (substr, file) => {
                 any = true;
-                if(!includeCache[file]) {
+                if(!this.#includeCache[file]) {
                     files.push(file);
                 }
                 return substr;
             });
 
             for(const file of files) {
-                includeCache[file] = await fs.readFile(join(inPath, `_${file}.html`), "utf-8");
+                this.#includeCache[file] = await this.#loader.load(`_${file}.html`);
             }
 
             // now, we can safely assume the templates are loaded
             source = source.replace(include, (substr, file, param) => {
                 const params = param ? param.split(includeArg) : [];
-                const tpl = includeCache[file].replace(includeParam, (substr, num, defValue) => {
+                const tpl = this.#includeCache[file].replace(includeParam, (substr, num, defValue) => {
                     num = parseInt(num, 10) - 1;
                     if(params.length > num) {
                         return params[num].replace(/\\\|/g, "|");
@@ -133,9 +152,9 @@ export async function compile(inPath, outPath) {
             dest = safeName(dest);
             let className = "";
 
-            if(!allPages[dest]) {
+            if(!this.#allPages[dest]) {
                 className = "broken";
-                if(allPages["404"]) {
+                if(this.#allPages["404"]) {
                     dest = "404";
                 }
             }
@@ -157,3 +176,4 @@ export async function compile(inPath, outPath) {
         return props;
     }
 }
+
