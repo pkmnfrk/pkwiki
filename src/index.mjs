@@ -1,7 +1,15 @@
 #!/usr/bin/env node
+
+import watch from "node-watch";
+import MarkdownIt from "markdown-it";
+import markdownItHeadinganchor from "markdown-it-headinganchor";
+
 import { isChildDirectory } from "./util.mjs";
 import { Compiler } from "./compile.mjs";
-import watch from "node-watch";
+import { FileLoader } from "./file-loader.mjs";
+import { FileSaver } from "./file-saver.mjs";
+import { TOCGenerator } from "./toc.mjs";
+
 
 let inPath, outPath;
 let doWatch = false;
@@ -30,7 +38,17 @@ if(isChildDirectory(outPath, inPath)) {
     process.exit(1);
 }
 
-const compiler = new Compiler(inPath, outPath);
+const loader = new FileLoader(inPath);
+const saver = new FileSaver(outPath);
+const md = new MarkdownIt("default", {
+    html: true,
+}).use(markdownItHeadinganchor, {
+    addHeadingId: true,
+    addHeadingAnchor: false,
+});
+const tocGenerator = new TOCGenerator(md);
+
+const compiler = new Compiler(loader, saver, md, tocGenerator);
 
 if(doWatch) {
     console.error("Compiling...");

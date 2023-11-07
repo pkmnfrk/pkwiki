@@ -1,36 +1,26 @@
-import MarkdownIt from "markdown-it";
-import markdownItHeadinganchor from "markdown-it-headinganchor";
-
 import { safeName } from "./util.mjs";
 import { basename, dirname } from "path";
-import { handleToc } from "./toc.mjs";
-import { FileLoader } from "./file-loader.mjs";
-import { FileSaver } from "./file-saver.mjs";
-
-const md = new MarkdownIt("default", {
-    html: true,
-}).use(markdownItHeadinganchor, {
-    addHeadingId: true,
-    addHeadingAnchor: false,
-});
 
 export class Compiler {
     #loader;
     #saver;
     #md;
+    #tocGenerator;
     #allPages;
     #includeCache;
 
-    constructor(inPath, outPath) {
-        this.#loader = new FileLoader(inPath);
-        this.#saver = new FileSaver(outPath);
-
-        this.#md = new MarkdownIt("default", {
-            html: true,
-        }).use(markdownItHeadinganchor, {
-            addHeadingId: true,
-            addHeadingAnchor: false,
-        });
+    /**
+     * 
+     * @param {import("./file-loader.mjs").FileLoader} loader
+     * @param {import("./file-saver.mjs").FileSaver} saver
+     * @param {import("markdown-it")} md
+     * @param {import("./toc.mjs").TOCGenerator} tocGenerator
+     */
+    constructor(loader, saver, md, tocGenerator) {
+        this.#loader = loader;
+        this.#saver = saver;
+        this.#md = md;
+        this.#tocGenerator = tocGenerator;
     }
 
     async compile() {
@@ -42,7 +32,6 @@ export class Compiler {
     
         this.#allPages = {};
         this.#includeCache = {};
-
         for await(const file of files) {
             try {
                 const source = await this.#loader.load(file);
@@ -65,8 +54,8 @@ export class Compiler {
             //const html = md.render(reProcessed.text);
             const env = {}
             const tokens = this.#md.parse(reProcessed.text, env);
-            handleToc(tokens, this.#md);
-            const html = md.renderer.render(tokens, this.#md.options, env);
+            this.#tocGenerator.handleToc(tokens);
+            const html = this.#md.renderer.render(tokens, this.#md.options, env);
     
             const body = template.
                 replace("{{prefixedtitle}}", ` - ${page.title}`).
@@ -85,8 +74,7 @@ export class Compiler {
 
     /**
      * 
-     * @param {string} source 
-     * @param {FileLoader} loader 
+     * @param {string} source
      * @returns 
      */
     async #processFile(source) {
