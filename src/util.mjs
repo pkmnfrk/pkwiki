@@ -45,14 +45,24 @@ export function repeatString(char, num) {
  * ignores escaped pipes (\|), handling things like escaped backslashes
  * @param {string} str the input string
  * @param {number} maxCount if set, max nr of results. Should be >= 2, otherwise will just return a single element
+ * @param {boolean} returnIndexes if set, return start/end pairs instead of actual strings
  */
-export function splitByPipe(str, maxCount) {
+export function splitByPipe(str, maxCount, returnIndexes) {
     let start = 0, ix = 0;
     const ret = [];
 
+    if(typeof(maxCount) === "boolean") {
+        returnIndexes = maxCount;
+        maxCount = undefined;
+    }
+
     while(ix < str.length && (typeof(maxCount) !== "number" || ret.length < maxCount - 1)) {
         if(str[ix] === "|") {
-            ret.push(str.slice(start, ix));
+            if(returnIndexes) {
+                ret.push([start, ix]);
+            } else {
+                ret.push(str.slice(start, ix));
+            }
             start = ix + 1;
         } else if(str[ix] === "\\") {
             //whatever the next character is, we skip it
@@ -63,12 +73,20 @@ export function splitByPipe(str, maxCount) {
     }
 
     if(start < str.length) {
-        ret.push(str.slice(start, str.length));
+        if(returnIndexes) {
+            ret.push([start, str.length]);
+        } else {
+            ret.push(str.slice(start, str.length));
+        }
     }
 
     if(ret.length === 0) {
         //always return at least one entry
-        ret.push("");
+        if(returnIndexes) {
+            ret.push([0,0]);
+        } else {
+            ret.push("");
+        }
     }
 
     return ret;
