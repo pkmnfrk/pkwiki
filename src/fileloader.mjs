@@ -1,6 +1,8 @@
+import { createRequire } from "module";
 import { join } from "path";
 import { promises as fs } from "fs";
-import { globIterate } from "glob";
+const require = createRequire(import.meta.url);
+const glob = require("glob");
 
 export class FileLoader {
     #inPath;
@@ -24,7 +26,7 @@ export class FileLoader {
     async * glob(pattern) {
         const finalPattern = join(this.#inPath, pattern);
 
-        for await (const file of globIterate(finalPattern)) {
+        for await (const file of glob.globIterate(finalPattern)) {
             let retFile = file;
             if(retFile.indexOf(this.#inPath) === 0) {
                 retFile = retFile.substring(this.#inPath.length + 1);
