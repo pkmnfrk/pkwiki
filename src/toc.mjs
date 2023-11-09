@@ -12,6 +12,7 @@ export class TOCGenerator {
     }
 
     handleToc(tokens) {
+        tokens = [...tokens];
         const headings = [];
         let minLevel = 7;
     
@@ -54,7 +55,7 @@ export class TOCGenerator {
                 tokens.splice(tokens.indexOf(token), 1, ...newTokens);
             }
         }
-    
+        return tokens;
     }
     
     #buildTocTokens(headings, tokens, minLevel, levelStr) {
@@ -64,6 +65,9 @@ export class TOCGenerator {
         }
     
         const newText = this.#buildTocText(headings, tokens, minLevel, level);
+        if(!newText) {
+            return [];
+        }
         const newTokens = this.#md.parse(newText);
     
         if(!newTokens[0].attrs) {
@@ -90,8 +94,7 @@ export class TOCGenerator {
             if(absLevel > level) {
                 continue;
             }
-            const thisLevel = parseInt(heading.tag.substring(1), 10) - minLevel;
-            const indent = repeatString("   ", thisLevel);
+            const indent = repeatString("   ", absLevel - minLevel);
             newText += `${indent}1. [${next.content}](#${id})\n`;
         }
     

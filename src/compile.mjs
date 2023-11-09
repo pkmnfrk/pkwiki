@@ -53,8 +53,8 @@ export class Compiler {
             const env = {
                 pages: Object.keys(this.#allPages),
             }
-            const tokens = this.#md.parse(page.processed, env);
-            this.#tocGenerator.handleToc(tokens);
+            let tokens = this.#md.parse(page.processed, env);
+            tokens = this.#tocGenerator.handleToc(tokens);
             const html = this.#md.renderer.render(tokens, this.#md.options, env);
     
             const body = template.

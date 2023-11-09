@@ -53,7 +53,7 @@ function createMocks() {
         options: "lol",
     }
     const toc = {
-        handleToc: sinon.stub(),
+        handleToc: sinon.stub().returnsArg(0),
     };
 
     return [loader, saver, md, toc];
