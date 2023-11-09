@@ -32,8 +32,6 @@ export class FileLoader {
                 retFile = retFile.substring(this.#inPath.length + 1);
             }
 
-            console.log(this.#inPath, retFile);
-
             yield retFile;
         }
     }
