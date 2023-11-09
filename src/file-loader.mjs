@@ -1,6 +1,6 @@
 import { join } from "path";
 import { promises as fs } from "fs";
-import {glob, globIterate} from "glob";
+import { globIterate } from "glob";
 
 export class FileLoader {
     #inPath;
