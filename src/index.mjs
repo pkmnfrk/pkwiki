@@ -54,18 +54,21 @@ const compiler = new Compiler(loader, saver, md, tocGenerator);
 
 if(doWatch) {
     console.error("Compiling...");
-    compiler.compile(inPath, outPath).then(() => {
-        console.log("Watching for changes...");
-        watch(inPath, {
-            persistent: true,
-            recursive: true,
-        }, (evt, filename) => {
-            console.error("Compiling...");
-            compiler.compile(inPath, outPath).catch((e) => {
-                console.error(e);
-            });
-        })
-    });
+    compiler.compile()
+        .then(() => {
+            console.log("Watching for changes...");
+            watch(inPath, {
+                persistent: true,
+                recursive: true,
+            }, (evt, filename) => {
+                console.error("Compiling...");
+                compiler.compile().catch((e) => {
+                    console.error(e, e.stack);
+                });
+            })
+        }).catch((e) => {
+            console.error("Fatal error while compiling", e);
+        });
 
     process.on("SIGINT", () => {
         process.exit(0);

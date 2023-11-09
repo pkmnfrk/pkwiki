@@ -24,7 +24,9 @@ export class Compiler {
     }
 
     async compile() {
-        this.#saver.recreateFolder();
+        const generateDate = new Date();
+
+        await this.#saver.recreateFolder();
 
         const template = await this.#loader.load("_template.html");
     
@@ -58,6 +60,7 @@ export class Compiler {
             const body = template.
                 replace(/{{prefixedtitle}}/g, ` - ${page.title}`).
                 replace(/{{title}}/g, page.title).
+                replace(/{{generatedate}}/g, generateDate.toUTCString()).
                 replace(/{{body}}/g, html);
     
             await this.#saver.save(`${page.id}.html`, body);
