@@ -46,7 +46,8 @@ export class Compiler {
                 page.source = await this.#loader.load(page.path);
                 await this.#processFile(page);
             } catch(e) {
-                throw new Error(`Encountered error processing page ${file}: ${e.message}`);
+                console.error(e);
+                throw new Error(`Encountered error processing page ${page.path}: ${e.message}`);
             }
 
             const env = {
@@ -89,18 +90,13 @@ export class Compiler {
 
         do {
             any = false;
+
             // run it once to get new template files
-            const files = [];
-            source.replace(include, (substr, file) => {
+            for(const [_, file] of source.matchAll(include)) {
                 any = true;
                 if(!this.#includeCache[file]) {
-                    files.push(file);
+                    this.#includeCache[file] = await this.#loader.load(`_${file}.html`);
                 }
-                return substr;
-            });
-
-            for(const file of files) {
-                this.#includeCache[file] = await this.#loader.load(`_${file}.html`);
             }
 
             // now, we can safely assume the templates are loaded
