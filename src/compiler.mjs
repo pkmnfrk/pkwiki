@@ -1,6 +1,4 @@
 import { Page } from "./page.mjs";
-import { safeName } from "./util.mjs";
-import { basename, dirname } from "path";
 
 export class Compiler {
     #loader;
@@ -13,10 +11,10 @@ export class Compiler {
 
     /**
      * 
-     * @param {import("./file-loader.mjs").FileLoader} loader
-     * @param {import("./file-saver.mjs").FileSaver} saver
+     * @param {import("./fileloader.mjs").FileLoader} loader
+     * @param {import("./filesaver.mjs").FileSaver} saver
      * @param {import("markdown-it")} md
-     * @param {import("./toc.mjs").TOCGenerator} tocGenerator
+     * @param {import("./tocgenerator.mjs").TOCGenerator} tocGenerator
      */
     constructor(loader, saver, md, tocGenerator) {
         this.#loader = loader;

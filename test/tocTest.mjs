@@ -1,7 +1,7 @@
 import MarkdownIt from "markdown-it";
 import assert from "assert";
 
-import { TOCGenerator } from "../src/toc.mjs";
+import { TOCGenerator } from "../src/tocgenerator.mjs";
 import markdownItHeadinganchor from "markdown-it-headinganchor";
 
 describe("TOCGenerator", function () {

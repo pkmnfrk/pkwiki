@@ -1,6 +1,5 @@
 import assert from "assert";
-import { Compiler } from "../src/compile.mjs";
-import * as toc from "../src/toc.mjs";
+import { Compiler } from "../src/compiler.mjs";
 
 import sinon from "sinon";
 

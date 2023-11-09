@@ -5,10 +5,10 @@ import MarkdownIt from "markdown-it";
 import markdownItHeadinganchor from "markdown-it-headinganchor";
 
 import { isChildDirectory } from "./util.mjs";
-import { Compiler } from "./compile.mjs";
-import { FileLoader } from "./file-loader.mjs";
-import { FileSaver } from "./file-saver.mjs";
-import { TOCGenerator } from "./toc.mjs";
+import { Compiler } from "./compiler.mjs";
+import { FileLoader } from "./fileloader.mjs";
+import { FileSaver } from "./filesaver.mjs";
+import { TOCGenerator } from "./tocgenerator.mjs";
 import { wikiLink_plugin } from "./plugins.mjs";
 
 
