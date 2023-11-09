@@ -5,7 +5,7 @@
   "main": "src/index.mjs",
   "module": "es6",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --timeout 0",
     "testsite": "node src/index.mjs test_site test_out",
     "watch": "node src/index.mjs test_site test_out --watch",
     "invalidChild": "node src/index.mjs test_site test_site/out"

@@ -1,3 +1,4 @@
+import { Page } from "./page.mjs";
 import { safeName } from "./util.mjs";
 import { basename, dirname } from "path";
 
@@ -6,6 +7,7 @@ export class Compiler {
     #saver;
     #md;
     #tocGenerator;
+    /** @type {Record<string, Page>} */
     #allPages;
     #includeCache;
 
@@ -32,37 +34,34 @@ export class Compiler {
     
         this.#allPages = {};
         this.#includeCache = {};
+
+        // pre-allocate the page data, so we know what does and does not exist
         for await(const file of files) {
+            const page = Page.fromFilename(file);
+            this.#allPages[page.id] = page;
+        }
+
+        for await(const page of Object.values(this.#allPages)) {
             try {
-                const source = await this.#loader.load(file);
-                const processedSource = await this.#processFile(source);
-                const baseName = safeName(basename(file, ".md"));
-                const page = {
-                    raw: source,
-                    baseName,
-                    title: baseName,
-                    ...processedSource,
-                };
-                this.#allPages[baseName] = page;
+                page.source = await this.#loader.load(page.path);
+                await this.#processFile(page);
             } catch(e) {
                 throw new Error(`Encountered error processing page ${file}: ${e.message}`);
             }
-        }
-    
-        for(const page of Object.values(this.#allPages)) {
-            const reProcessed = await this.#processFile(page.raw);
-            //const html = md.render(reProcessed.text);
-            const env = {}
-            const tokens = this.#md.parse(reProcessed.text, env);
+
+            const env = {
+                pages: Object.keys(this.#allPages),
+            }
+            const tokens = this.#md.parse(page.processed, env);
             this.#tocGenerator.handleToc(tokens);
             const html = this.#md.renderer.render(tokens, this.#md.options, env);
     
             const body = template.
-                replace("{{prefixedtitle}}", ` - ${page.title}`).
-                replace("{{title}}", page.title).
-                replace("{{body}}", html);
+                replace(/{{prefixedtitle}}/g, ` - ${page.title}`).
+                replace(/{{title}}/g, page.title).
+                replace(/{{body}}/g, html);
     
-            await this.#saver.save(`${page.baseName}.html`, body);
+            await this.#saver.save(`${page.id}.html`, body);
         }
     
         for await (const file of this.#loader.glob("**/*.{css,png,jpg,gif}")) {
@@ -74,22 +73,19 @@ export class Compiler {
 
     /**
      * 
-     * @param {string} source
+     * @param {Page} page
      * @returns 
      */
-    async #processFile(source) {
-        const link = /\[\[(.*?)(?:\|(.*?))?\]\]/g;
+    async #processFile(page) {
         const pragma = /^#(\w+)(.*)$/gm;
         const include = /\{\{([^#].*?)(?:\|(.*))?\}\}/g;
         const includeArg = /(?<!\\)\|/g;
         const includeParam = /{{#(\d)(?:\|(.*?))?}}/g;
-        const props = {
-
-        };
 
         // first, resolve any includes. Basically, keep looping until we either hit the limit or stop including things
         let any = false;
         let includeDepth = 500;
+        let source = page.source;
 
         do {
             any = false;
@@ -127,41 +123,14 @@ export class Compiler {
         } while(any);
 
 
-        props.text = source.replace(link, (substr, dest, title) => {
-            //console.log(dest, title);
-            let anchor = "";
-            if(dest.indexOf("#") !== -1) {
-                [dest, anchor] = dest.split("#");
-            }
-
-            if(!title) {
-                title = dest;
-            }
-            dest = safeName(dest);
-            let className = "";
-
-            if(!this.#allPages[dest]) {
-                className = "broken";
-                if(this.#allPages["404"]) {
-                    dest = "404";
-                }
-            }
-
-            return `<a href="${dest}.html${anchor ? `#${anchor}` : ""}"${className ? ` class="${className}"` : ""}>${title}</a>`;
-        }).replace(pragma, (substr, keyword, args) => {
+        page.processed = source.replace(pragma, (substr, keyword, args) => {
             switch(keyword) {
                 case "title":
-                    props.title = args.trim();
+                    page.title = args.trim();
                     return "";
-                // case "toc":
-                //     return "${toc}";
             }
             return substr;
-        })
-
-        // console.log(source);
-
-        return props;
+        });
     }
 }
 

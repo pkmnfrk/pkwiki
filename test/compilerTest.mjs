@@ -78,9 +78,9 @@ describe("Compiler", () => {
         sinon.assert.calledWithExactly(loader.load, "_template.html");
         sinon.assert.calledWithExactly(loader.glob, "*.md");
         sinon.assert.calledWithExactly(loader.load, "a.md");
-        sinon.assert.calledWithExactly(md.parse, "", {});
+        sinon.assert.calledWithExactly(md.parse, "", { pages: ["a"] });
         sinon.assert.calledWithExactly(toc.handleToc, []);
-        sinon.assert.calledWithExactly(md.renderer.render, [], "lol", {});
+        sinon.assert.calledWithExactly(md.renderer.render, [], "lol", { pages: ["a"] });
 
         sinon.assert.calledWithExactly(saver.save, "a.html", "<p>rendered</p>");
     });

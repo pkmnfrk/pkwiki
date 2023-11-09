@@ -9,6 +9,7 @@ import { Compiler } from "./compile.mjs";
 import { FileLoader } from "./file-loader.mjs";
 import { FileSaver } from "./file-saver.mjs";
 import { TOCGenerator } from "./toc.mjs";
+import { wikiLink_plugin } from "./plugins.mjs";
 
 
 let inPath, outPath;
@@ -45,7 +46,8 @@ const md = new MarkdownIt("default", {
 }).use(markdownItHeadinganchor, {
     addHeadingId: true,
     addHeadingAnchor: false,
-});
+}).use(wikiLink_plugin);
+
 const tocGenerator = new TOCGenerator(md);
 
 const compiler = new Compiler(loader, saver, md, tocGenerator);
