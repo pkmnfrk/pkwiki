@@ -96,6 +96,9 @@ function wikiLink(state, silent) {
     let dest = content.slice(segments[0][0], segments[0][1]);
     let anchor = "";
     let useDest = false;
+    let isBroken = false;
+
+    const pages = state.env.pages ?? [];
 
     // If there is an Anchor, then extract it from Destionation
     if(dest.indexOf("#") !== -1) {
@@ -103,15 +106,25 @@ function wikiLink(state, silent) {
         anchor = "#" + anchor;
     }
 
+    let destId = safeName(dest);
+
     // No label, so indicate that we want to use the Destination instead
     if(segments.length === 1) {
         useDest = true;
     }
 
+    if(pages.indexOf(destId) === -1) {
+        isBroken = true;
+        if(pages.indexOf("404") !== -1) {
+            anchor = `#${dest}`;
+            destId = "404";
+        }
+    }
+
     // create the <a> tag
     let attrs = [
-        ["href", `${safeName(dest)}.html${anchor}`],
-        ["class", "wiki-link"],
+        ["href", `${destId}.html${anchor}`],
+        ["class", `wiki-link${isBroken ? " broken" : ""}`],
     ];
     token = state.push("link_open", "a", 1);
     token.attrs = attrs
