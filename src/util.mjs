@@ -14,7 +14,11 @@ export async function safeMkdir(path) {
 }
 
 export function safeName(name) {
-    return name.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
+    return name.
+        replace(/[^a-zA-Z0-9]/g, "-").
+        replace(/--+/g, "-").
+        replace(/^-|-$/g, "").
+        toLowerCase();
 }
 
 export function isChildDirectory(child, parent) {
